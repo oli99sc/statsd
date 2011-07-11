@@ -7,6 +7,29 @@ var counters = {};
 var timers = {};
 var debugInt, flushInt, server;
 
+function measureForKey (key, fields){
+  var sampleRate = 1;
+  if (fields[1] === undefined) {
+    sys.log('Bad line: ' + fields);
+  } else {
+    if (fields[1].trim() == "ms") {
+      if (! timers[key]) {
+        timers[key] = [];
+      }
+      timers[key].push(Number(fields[0] || 0));
+    } else {
+      if (fields[2] && fields[2].match(/^@([\d\.]+)/)) {
+        sampleRate = Number(fields[2].match(/^@([\d\.]+)/)[1]);
+      }
+      if (! counters[key]) {
+        counters[key] = 0;
+      }
+      counters[key] += Number(fields[0] || 1) * (1 / sampleRate);
+    }
+  }
+}
+
+
 config.configFile(process.argv[2], function (config, oldConfig) {
   if (! config.debug && debugInt) {
     clearInterval(debugInt); 
@@ -34,25 +57,11 @@ config.configFile(process.argv[2], function (config, oldConfig) {
       }
 
       for (var i = 0; i < bits.length; i++) {
-        var sampleRate = 1;
         var fields = bits[i].split("|");
-        if (fields[1] === undefined) {
-            sys.log('Bad line: ' + fields);
-            continue;
-        }
-        if (fields[1].trim() == "ms") {
-          if (! timers[key]) {
-            timers[key] = [];
-          }
-          timers[key].push(Number(fields[0] || 0));
-        } else {
-          if (fields[2] && fields[2].match(/^@([\d\.]+)/)) {
-            sampleRate = Number(fields[2].match(/^@([\d\.]+)/)[1]);
-          }
-          if (! counters[key]) {
-            counters[key] = 0;
-          }
-          counters[key] += Number(fields[0] || 1) * (1 / sampleRate);
+        measureForKey(key, fields);
+        if (config.measureByIP) {
+          var keyWithIp = key + '.' + rinfo.address ; 
+          measureForKey(keyWithIp , fields); 
         }
       }
     });
