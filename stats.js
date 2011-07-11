@@ -58,10 +58,12 @@ config.configFile(process.argv[2], function (config, oldConfig) {
 
       for (var i = 0; i < bits.length; i++) {
         var fields = bits[i].split("|");
-        measureForKey(key, fields);
         if (config.measureByIP) {
-          var keyWithIp = key + '.' + rinfo.address ; 
+          measureForKey(key + ".all", fields);
+          var keyWithIp = key + '.' + rinfo.address.replace(/\./g,'-') ; 
           measureForKey(keyWithIp , fields); 
+        } else {
+          measureForKey(key, fields);
         }
       }
     });
