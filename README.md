@@ -76,6 +76,18 @@ Installation and Configuration
     node stats.js /path/to/config
 
 
+Configuration Options
+---------------------
+
+* measureByIP
+  
+If set in config file, each counter and timer will be measured and accumulated additionally by the IP address statds received the UDP package from. To compensate for the fact that graphite can not cope with nodes and directories with the same name, the string ".all" is added to the key for the over all aggregates.
+
+If nodes 192.168.22.1 and 192.168.22.13 send in a counter with key "foo.bar" this will result in values for keys:  
+  stats.foo.bar.all                    : with the aggregated values over all servers
+  stats.foo.bar.192-168-22-1           : for measures of host with ip 192.168.22.1
+  stats.foo.bar.192-168-22-13          : measures of host with ip 192.168.22.13
+
 Inspiration
 -----------
 
