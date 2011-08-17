@@ -1,18 +1,22 @@
 #!/bin/bash
 #
-#	/etc/rc.d/init.d/statsd
+#	/etc/rc.d/init.d/is24-statsd
 #
-# Starts the statsd daemon
+# Starts the is24 statsd daemon
 #
 # chkconfig: ?
 # description: Frontend aggregatation of messages destined for graphite daemon
-# processname: statsd
+# processname: is24-statsd
 
 # Source function library.
 . /etc/rc.d/init.d/functions
 
-[ -x /usr/local/bin/node ] || exit 0
-[ -f /opt/statsd/stats.js ] || exit 0
+NAME=is24-statsd
+INSTALL_DIR=/usr/share/$NAME
+NODE_EXE=/usr/bin/node
+
+[ -x $NODE_EXE ] || exit 0
+[ -f $INSTALL_DIR/stats.js ] || exit 0
 
 RETVAL=0
 
@@ -22,13 +26,13 @@ RETVAL=0
 
 start() {
 	# Check if it is already running
-	if [ ! -f /var/lock/subsys/statsd ]; then
-	    echo -n $"Starting statsd daemon: "
+	if [ ! -f /var/lock/subsys/$NAME ]; then
+	    echo -n $"Starting $NAME daemon: "
         # daemon
-        /usr/local/bin/node /opt/statsd/stats.js /opt/statsd/exampleConfig.js 2>&1 >/dev/null &
+        $NODE_EXE $INSTALL_DIR/stats.js /etc/$NAME/config.js 2>&1 >/dev/null &
 	    RETVAL=$?
         if [ $RETVAL -eq 0 ]; then
-            touch /var/lock/subsys/statsd
+            touch /var/lock/subsys/$NAME
             echo_success
         else
             echo_failure
@@ -39,12 +43,12 @@ start() {
 }
 
 stop() {
-	echo -n $"Stopping statsd daemon: "
+	echo -n $"Stopping $NAME daemon: "
     pid=$(ps wa | grep stats.js | grep node | awk '{print $1}')
     kill $pid
 	RETVAL=$?
     if [ $RETVAL -eq 0 ]; then
-        rm -f /var/lock/subsys/statsd
+        rm -f /var/lock/subsys/%NAME
         echo_success
     else
         echo_failure
@@ -78,16 +82,16 @@ restart)
 	restart
 	;;
 condrestart)
-	if [ -f /var/lock/subsys/statsd ]; then
+	if [ -f /var/lock/subsys/$NAME ]; then
 	    restart
 	fi
 	;;
 status)
-	if [ -f /var/lock/subsys/statsd ]; then
-        echo "statsd is running"
+	if [ -f /var/lock/subsys/$NAME ]; then
+        echo "$NAME is running"
         exit 0
     else
-        echo "statsd is stopped"
+        echo "$NAME is stopped"
         exit 3
     fi
 	;;
