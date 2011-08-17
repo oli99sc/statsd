@@ -1,6 +1,6 @@
 {
   graphitePort: 2003
-, graphiteHost: "graphite.host.com"
+, graphiteHost: "localhost"
 , port: 8125
 }
 
