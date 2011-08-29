@@ -75,7 +75,9 @@ config.configFile(process.argv[2], function (config, oldConfig) {
     flushInt = setInterval(function () {
       var statString = '';
       var ts = Math.round(new Date().getTime() / 1000);
-      var numStats = 0;
+      var numTimers = 0;
+      var numCounters = 0;
+      var numTimersWithValues = 0;
       var key;
 
       for (key in counters) {
@@ -84,11 +86,11 @@ config.configFile(process.argv[2], function (config, oldConfig) {
         message += 'stats_counts.' + key + ' ' + counters[key] + ' ' + ts + "\n";
         statString += message;
         counters[key] = 0;
-
-        numStats += 1;
+	numCounters += 1;
       }
 
       for (key in timers) {
+        numTimers += 1;
         if (timers[key].length > 0) {
           var pctThreshold = config.percentThreshold || 90;
           var values = timers[key].sort(function (a,b) { return a-b; });
@@ -123,12 +125,13 @@ config.configFile(process.argv[2], function (config, oldConfig) {
           message += 'stats.timers.' + key + '.lower ' + min + ' ' + ts + "\n";
           message += 'stats.timers.' + key + '.count ' + count + ' ' + ts + "\n";
           statString += message;
-
-          numStats += 1;
+          numTimersWithValues +=1;  
         }
       }
 
-      statString += 'statsd.numStats ' + numStats + ' ' + ts + "\n";
+      statString += 'statsd.numCounters ' + numCounters + ' ' + ts + "\n";
+      statString += 'statsd.numTimers ' + numTimers + ' ' + ts + "\n";
+      statString += 'statsd.numTimersWithValues ' + numTimersWithValues + ' ' + ts + "\n";
       
       try {
         var graphite = net.createConnection(config.graphitePort, config.graphiteHost);
