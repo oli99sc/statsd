@@ -53,7 +53,7 @@ start() {
 
 stop() {
 	echo -n $"Stopping $NAME daemon: "
-    pid=$(ps wa | grep stats.js | grep node | awk '{print $1}')
+    pid=$(ps -aux | grep stats.js | grep node | awk '{print $2}')
     kill $pid
 	RETVAL=$?
     if [ $RETVAL -eq 0 ]; then
