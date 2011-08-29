@@ -57,7 +57,7 @@ stop() {
     kill $pid
 	RETVAL=$?
     if [ $RETVAL -eq 0 ]; then
-        rm -f /var/lock/subsys/%NAME
+        rm -f /var/lock/subsys/$NAME
         echo_success
     else
         echo_failure
