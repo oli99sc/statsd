@@ -4,9 +4,18 @@
 #
 # Starts the is24 statsd daemon
 #
-# chkconfig: ?
+# chkconfig: 2345 20 80
 # description: Frontend aggregatation of messages destined for graphite daemon
 # processname: is24-statsd
+
+### BEGIN INIT INFO
+# Provides: is24-statsd
+# Defalt-Start: 2 3 4 5
+# Default-Stop: 0 1 6
+# Description: Frontend aggregatation of messages destined for graphite daemon
+### END INIT INFO
+
+
 
 # Source function library.
 . /etc/rc.d/init.d/functions
@@ -29,7 +38,7 @@ start() {
 	if [ ! -f /var/lock/subsys/$NAME ]; then
 	    echo -n $"Starting $NAME daemon: "
         # daemon
-        $NODE_EXE $INSTALL_DIR/stats.js /etc/$NAME/config.js 2>&1 >/dev/null &
+        $NODE_EXE $INSTALL_DIR/stats.js /etc/$NAME/config.js >/dev/null 2>&1 &
 	    RETVAL=$?
         if [ $RETVAL -eq 0 ]; then
             touch /var/lock/subsys/$NAME
@@ -44,11 +53,11 @@ start() {
 
 stop() {
 	echo -n $"Stopping $NAME daemon: "
-    pid=$(ps wa | grep stats.js | grep node | awk '{print $1}')
+    pid=$(ps aux | grep stats.js | grep node | awk '{print $2}')
     kill $pid
 	RETVAL=$?
     if [ $RETVAL -eq 0 ]; then
-        rm -f /var/lock/subsys/%NAME
+        rm -f /var/lock/subsys/$NAME
         echo_success
     else
         echo_failure
