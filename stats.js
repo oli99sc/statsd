@@ -9,22 +9,33 @@ var debugInt, flushInt, server;
 
 function measureForKey (key, fields){
   var sampleRate = 1;
+  var finalKey = key;
   if (fields[1] === undefined) {
     sys.log('Bad line: ' + fields);
   } else {
     if (fields[1].trim() == "ms") {
-      if (! timers[key]) {
-        timers[key] = [];
+      if (!(fields[3] === undefined)) {
+        finalKey = fields[3] + '.timers.' + key ;
+      } else {
+        finalKey = 'other.unknownHosts.timers.' + key ;
       }
-      timers[key].push(Number(fields[0] || 0));
+      if (! timers[finalKey]) {
+        timers[finalKey] = [];
+      }
+      timers[finalKey].push(Number(fields[0] || 0));
     } else {
+      if (!(fields[3] === undefined)) {
+        finalKey = fields[3] + "." + key ;
+      } else {
+        finalKey = 'other.unknownHosts' + key ;
+      }
       if (fields[2] && fields[2].match(/^@([\d\.]+)/)) {
         sampleRate = Number(fields[2].match(/^@([\d\.]+)/)[1]);
       }
-      if (! counters[key]) {
-        counters[key] = 0;
+      if (! counters[finalKey]) {
+        counters[finalKey] = 0;
       }
-      counters[key] += Number(fields[0] || 1) * (1 / sampleRate);
+      counters[finalKey] += Number(fields[0] || 1) * (1 / sampleRate);
     }
   }
 }
@@ -58,13 +69,7 @@ config.configFile(process.argv[2], function (config, oldConfig) {
 
       for (var i = 0; i < bits.length; i++) {
         var fields = bits[i].split("|");
-        if (config.measureByIP) {
-          measureForKey(key + ".all", fields);
-          var keyWithIp = key + '.' + rinfo.address.replace(/\./g,'-') ; 
-          measureForKey(keyWithIp , fields); 
-        } else {
-          measureForKey(key, fields);
-        }
+        measureForKey(key, fields);
       }
     });
 
@@ -82,8 +87,7 @@ config.configFile(process.argv[2], function (config, oldConfig) {
 
       for (key in counters) {
         var value = counters[key] / (flushInterval / 1000);
-        var message = 'stats.' + key + ' ' + value + ' ' + ts + "\n";
-        message += 'stats_counts.' + key + ' ' + counters[key] + ' ' + ts + "\n";
+        var message = key + ' ' + value + ' ' + ts + "\n";
         statString += message;
         counters[key] = 0;
 	numCounters += 1;
@@ -119,11 +123,11 @@ config.configFile(process.argv[2], function (config, oldConfig) {
           timers[key] = [];
 
           var message = "";
-          message += 'stats.timers.' + key + '.mean ' + mean + ' ' + ts + "\n";
-          message += 'stats.timers.' + key + '.upper ' + max + ' ' + ts + "\n";
-          message += 'stats.timers.' + key + '.upper_' + pctThreshold + ' ' + maxAtThreshold + ' ' + ts + "\n";
-          message += 'stats.timers.' + key + '.lower ' + min + ' ' + ts + "\n";
-          message += 'stats.timers.' + key + '.count ' + count + ' ' + ts + "\n";
+          message += key + '.mean ' + mean + ' ' + ts + "\n";
+          message += key + '.upper ' + max + ' ' + ts + "\n";
+          message += key + '.upper_' + pctThreshold + ' ' + maxAtThreshold + ' ' + ts + "\n";
+          message += key + '.lower ' + min + ' ' + ts + "\n";
+          message += key + '.count ' + count + ' ' + ts + "\n";
           statString += message;
           numTimersWithValues +=1;  
         }
