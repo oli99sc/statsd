@@ -15,9 +15,10 @@ function measureForKey (key, fields){
     sys.log('Bad line: ' + fields);
   } else {
     if (!(fields[3] === undefined)) {
-      prefix = fields[3].replace(/devbui([0-9]{2})_[a-zA-Z0-9_]*?/g, 'bui')
-                        .replace(/dev([0-9]{4})_[a-zA-Z0-9_]*?/g, 'localdev')
-                        .replace(/isdebln[a-zA-Z]{2}([0-9]{2})_[a-zA-Z0-9_]*?/ig, 'localdev')
+      prefix = fields[3].replace(/_[a-zA-Z0-9_]*/g, '')
+                        .replace(/devbui([0-9]{2})/g, 'bui')
+                        .replace(/dev([0-9]{4})/g, 'localdev')
+                        .replace(/isdebln[a-zA-Z]{2}[0-9]{2}/ig, 'localdev')
     }
     if (fields[1].trim() == "ms") {
       finalKey = prefix + '.timers.' + key ;
