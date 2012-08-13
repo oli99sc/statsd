@@ -27,7 +27,7 @@ function measureForKey (key, fields){
       if (!(fields[3] === undefined)) {
         finalKey = fields[3] + "." + key ;
       } else {
-        finalKey = 'other.unknownHosts' + key ;
+        finalKey = 'other.unknownHosts.' + key ;
       }
       if (fields[2] && fields[2].match(/^@([\d\.]+)/)) {
         sampleRate = Number(fields[2].match(/^@([\d\.]+)/)[1]);
