@@ -9,26 +9,24 @@ var debugInt, flushInt, server;
 
 function measureForKey (key, fields){
   var sampleRate = 1;
+  var prefix = 'other.unknownHosts' ;
   var finalKey = key;
   if (fields[1] === undefined) {
     sys.log('Bad line: ' + fields);
   } else {
+    if (!(fields[3] === undefined)) {
+      prefix = fields[3].replace(/devbui([0-9]{2})_[a-zA-Z0-9_]*?/g, 'bui')
+                        .replace(/dev([0-9]{4})_[a-zA-Z0-9_]*?/g, 'localdev')
+                        .replace(/isdebln[a-zA-Z]{2}([0-9]{2})_[a-zA-Z0-9_]*?/ig, 'localdev')
+    }
     if (fields[1].trim() == "ms") {
-      if (!(fields[3] === undefined)) {
-        finalKey = fields[3] + '.timers.' + key ;
-      } else {
-        finalKey = 'other.unknownHosts.timers.' + key ;
-      }
+      finalKey = prefix + '.timers.' + key ;
       if (! timers[finalKey]) {
         timers[finalKey] = [];
       }
       timers[finalKey].push(Number(fields[0] || 0));
     } else {
-      if (!(fields[3] === undefined)) {
-        finalKey = fields[3] + "." + key ;
-      } else {
-        finalKey = 'other.unknownHosts.' + key ;
-      }
+      finalKey = prefix + '.' + key ;
       if (fields[2] && fields[2].match(/^@([\d\.]+)/)) {
         sampleRate = Number(fields[2].match(/^@([\d\.]+)/)[1]);
       }
