@@ -18,7 +18,8 @@ function measureForKey (key, fields){
       prefix = fields[3].replace(/_[a-zA-Z0-9_]*/g, '')
                         .replace(/devbui([0-9]{2})/g, 'bui')
                         .replace(/dev([0-9]{4})/g, 'localdev')
-                        .replace(/isdebln[a-zA-Z]{2}[0-9]{2}/ig, 'localdev')
+                        .replace(/isdebln[a-zA-Z]{2}[0-9]+/ig, 'localdev')
+                        .replace(/[0-9]+/g, '')
     }
     if (fields[1].trim() == "ms") {
       finalKey = prefix + '.timers.' + key ;
