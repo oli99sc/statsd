@@ -22,7 +22,7 @@
 
 NAME=is24-statsd
 INSTALL_DIR=/usr/share/$NAME
-NODE_EXE=/usr/bin/node
+NODE_EXE=/usr/bin/nodejs
 
 [ -x $NODE_EXE ] || exit 0
 [ -f $INSTALL_DIR/stats.js ] || exit 0
@@ -53,7 +53,7 @@ start() {
 
 stop() {
     echo -n $"Stopping $NAME daemon: "
-    pid=$(ps aux | grep stats.js | grep node | awk '{print $2}')
+    pid=$(ps aux | grep stats.js | grep nodejs | awk '{print $2}')
     kill $pid
     RETVAL=$?
     if [ $RETVAL -eq 0 ]; then
