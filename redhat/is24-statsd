@@ -15,8 +15,6 @@
 # Description: Frontend aggregatation of messages destined for graphite daemon
 ### END INIT INFO
 
-
-
 # Source function library.
 . /etc/rc.d/init.d/functions
 
@@ -24,8 +22,17 @@ NAME=is24-statsd
 INSTALL_DIR=/usr/share/$NAME
 NODE_EXE=/usr/bin/nodejs
 
-[ -x $NODE_EXE ] || exit 0
-[ -f $INSTALL_DIR/stats.js ] || exit 0
+if [ ! -x $NODE_EXE ]; then
+  if [ -x /usr/bin/node ]; then
+    echo -n "use alternate node binary"
+    NODE_EXE=/usr/bin/node
+  else
+    echo -n "no node binary found" 
+    echo_failure; 
+    exit 0
+  fi
+fi
+[ -f $INSTALL_DIR/stats.js ] || (echo "stats.js not found" ; exit 0)
 
 RETVAL=0
 
@@ -47,20 +54,31 @@ start() {
             echo_failure
         fi
         echo
+    else
+      echo -n "lock file indicates allready running"
+      echo_failure
     fi
     return $RETVAL
 }
 
 stop() {
     echo -n $"Stopping $NAME daemon: "
-    pid=$(ps aux | grep stats.js | grep nodejs | awk '{print $2}')
-    kill $pid
-    RETVAL=$?
-    if [ $RETVAL -eq 0 ]; then
-        rm -f /var/lock/subsys/$NAME
-        echo_success
+    pid=$(ps aux | grep stats.js | grep node | awk '{print $2}')
+    if [ "$pid" != "" ]; then 
+       echo "killing pid $pid"
+       kill $pid
+       RETVAL=$?
+       if [ $RETVAL -eq 0 ]; then
+           rm -f /var/lock/subsys/$NAME
+          echo_success
+       else
+          echo_failure
+       fi
     else
-        echo_failure
+       echo "no process found"
+       rm -f /var/lock/subsys/$NAME
+       echo_failure
+       RETVAL=1
     fi
     echo
     return $RETVAL
