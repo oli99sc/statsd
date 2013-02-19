@@ -2,10 +2,12 @@ var dgram  = require('dgram')
   , sys    = require('sys')
   , net    = require('net')
   , config = require('./config')
+  , os     = require("os");
 
 var counters = {};
 var timers = {};
 var debugInt, flushInt, server;
+var hostid = os.hostname().replace(/\./g, '_');
 
 function measureForKey (key, fields){
   var sampleRate = 1;
@@ -135,9 +137,9 @@ config.configFile(process.argv[2], function (config, oldConfig) {
         }
       }
 
-      statString += 'statsd.numCounters ' + numCounters + ' ' + ts + "\n";
-      statString += 'statsd.numTimers ' + numTimers + ' ' + ts + "\n";
-      statString += 'statsd.numTimersWithValues ' + numTimersWithValues + ' ' + ts + "\n";
+      statString += 'statsd.' + hostid + '.numCounters ' + numCounters + ' ' + ts + "\n";
+      statString += 'statsd.' + hostid + '.numTimers ' + numTimers + ' ' + ts + "\n";
+      statString += 'statsd.' + hostid + '.numTimersWithValues ' + numTimersWithValues + ' ' + ts + "\n";
       
       try {
         var graphite = net.createConnection(config.graphitePort, config.graphiteHost);
