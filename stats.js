@@ -32,7 +32,7 @@ function measureForKey (key, fields){
       }
       timers[finalKey].push(Number(fields[0] || 0));
     } else {
-      finalKey = prefix + '.' + key ;
+      finalKey = prefix + '.counters.' + key ;
       if (fields[2] && fields[2].match(/^@([\d\.]+)/)) {
         sampleRate = Number(fields[2].match(/^@([\d\.]+)/)[1]);
       }
