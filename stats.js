@@ -11,7 +11,7 @@ var hostid = os.hostname().replace(/\./g, '_');
 
 function measureForKey (key, fields){
   var sampleRate = 1;
-  var prefix = 'other.unknownHosts' ;
+  var prefix = '' ;
   var finalKey = key;
   if (fields[1] === undefined) {
     sys.log('Bad line: ' + fields);
@@ -23,16 +23,16 @@ function measureForKey (key, fields){
                         .replace(/isdebln[a-zA-Z]+[0-9]+/ig, 'localdev')
                         .replace(/nb-[a-zA-Z0-9]+/ig, 'localdev')
                         .replace(/localhost/g, 'localdev')
-                        .replace(/[0-9]+/g, '')
+                        .replace(/[0-9]+/g, '')+'.'
     }
     if (fields[1].trim() == "ms") {
-      finalKey = prefix + '.timers.' + key ;
+      finalKey = prefix + 'timers.' + key ;
       if (! timers[finalKey]) {
         timers[finalKey] = [];
       }
       timers[finalKey].push(Number(fields[0] || 0));
     } else {
-      finalKey = prefix + '.counters.' + key ;
+      finalKey = prefix + 'counters.' + key ;
       if (fields[2] && fields[2].match(/^@([\d\.]+)/)) {
         sampleRate = Number(fields[2].match(/^@([\d\.]+)/)[1]);
       }
