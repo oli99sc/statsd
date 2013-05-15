@@ -16,7 +16,7 @@ function measureForKey (key, fields){
   if (fields[1] === undefined) {
     sys.log('Bad line: ' + fields);
   } else {
-    if (!(fields[3] === undefined)) {
+    if (isInApplicationMonitorMetric(fields)) {
       prefix = fields[3].replace(/_[a-zA-Z0-9_]*/g, '')
                         .replace(/devbui([0-9]{2})/g, 'bui')
                         .replace(/dev([0-9]{4})/g, 'localdev')
@@ -26,13 +26,21 @@ function measureForKey (key, fields){
                         .replace(/[0-9]+/g, '')+'.'
     }
     if (fields[1].trim() == "ms") {
-      finalKey = prefix + 'timers.' + key ;
+      if (isInApplicationMonitorMetric(fields)) {
+        finalKey = prefix + 'timers.' + key ;
+      } else {
+	finalKey = key;
+      }
       if (! timers[finalKey]) {
         timers[finalKey] = [];
       }
       timers[finalKey].push(Number(fields[0] || 0));
     } else {
-      finalKey = prefix + 'counters.' + key ;
+      if (isInApplicationMonitorMetric(fields)) {
+        finalKey = prefix + 'counters.' + key ;
+      } else {
+	finalKey = key;
+      }
       if (fields[2] && fields[2].match(/^@([\d\.]+)/)) {
         sampleRate = Number(fields[2].match(/^@([\d\.]+)/)[1]);
       }
@@ -42,6 +50,10 @@ function measureForKey (key, fields){
       counters[finalKey] += Number(fields[0] || 1) * (1 / sampleRate);
     }
   }
+}
+
+function isInApplicationMonitorMetric(fields) {
+  return !(fields[3] === undefined);
 }
 
 
