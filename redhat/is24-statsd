@@ -45,7 +45,7 @@ start() {
     if [ ! -f /var/lock/subsys/$NAME ]; then
         echo -n $"Starting $NAME daemon: "
         # daemon
-        sudo -u is24-statsd -- $NODE_EXE $INSTALL_DIR/stats.js /etc/$NAME/config.js >/dev/null 2>&1 </dev/null &
+        daemon --user is24-statsd $NODE_EXE $INSTALL_DIR/stats.js /etc/$NAME/config.js  2>&1 | logger &
         RETVAL=$?
         if [ $RETVAL -eq 0 ]; then
             touch /var/lock/subsys/$NAME
