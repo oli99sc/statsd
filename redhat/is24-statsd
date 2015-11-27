@@ -24,10 +24,10 @@ NODE_EXE=/usr/bin/nodejs
 
 if [ ! -x $NODE_EXE ]; then
   if [ -x /usr/bin/node ]; then
-    echo -n "use alternate node binary"
+    echo "use alternate node binary"
     NODE_EXE=/usr/bin/node
   else
-    echo -n "no node binary found" 
+    echo "no node binary found" 
     echo_failure; 
     exit 0
   fi
@@ -45,7 +45,7 @@ start() {
     if [ ! -f /var/lock/subsys/$NAME ]; then
         echo -n $"Starting $NAME daemon: "
         # daemon
-        sudo -u is24-statsd -- $NODE_EXE $INSTALL_DIR/stats.js /etc/$NAME/config.js >/dev/null 2>&1 </dev/null &
+        sudo -u $NAME -- $NODE_EXE $INSTALL_DIR/stats.js /etc/$NAME/config.js >/dev/null 2>&1 </dev/null &
         RETVAL=$?
         if [ $RETVAL -eq 0 ]; then
             touch /var/lock/subsys/$NAME
@@ -55,29 +55,27 @@ start() {
         fi
         echo
     else
-      echo -n "lock file indicates allready running"
-      echo_failure
+      echo "lock file indicates allready running"
+      echo_success
     fi
     return $RETVAL
 }
 
 stop() {
     echo -n $"Stopping $NAME daemon: "
-    pid=$(ps aux | grep stats.js | grep node | awk '{print $2}')
-    if [ "$pid" != "" ]; then 
+    pid=$( pgrep -u $NAME -f $INSTALL_DIR/stats.js )
+    if [ ! -z "$pid" ]; then 
        echo "killing pid $pid"
        kill $pid
        RETVAL=$?
        if [ $RETVAL -eq 0 ]; then
            rm -f /var/lock/subsys/$NAME
           echo_success
-       else
-          echo_failure
        fi
     else
        echo "no process found"
        rm -f /var/lock/subsys/$NAME
-       echo_failure
+       echo_success
        RETVAL=1
     fi
     echo
